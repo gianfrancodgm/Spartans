@@ -1,7 +1,7 @@
-import sim
-import time
-import math
-import numpy as np
+import sim #para hacer conexion y ejecucion con la api
+import time #para hacer el temporizador
+import math #para obtener velocidad angular
+import numpy as np #para hacer listados mas rapidos (opcional)
 
 '''
 comando a colocar en coppelia
