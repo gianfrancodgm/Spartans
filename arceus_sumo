@@ -1,0 +1,109 @@
+function sysCall_init()
+    -- do some initialization here
+    -- Motores
+    M = {} 
+    dir=0
+    L="L"
+    R="R"
+    T="backAr"
+    M[L], M[R] = sim.getObjectHandle(L..T), sim.getObjectHandle(R..T)
+    vel = -5 -- cm/s
+    radio = 5 -- cm/rad (radio ruedas)
+    v_inicial = vel/radio -- rad/s
+    
+    Vmax=-8
+    v = v_inicial
+    v2 = v_inicial+2
+    --Sensores de color
+    sensor = sim.getObjectHandle("sensor_de_color")
+    sensorb= sim.getObjectHandle("sensorcolorBack")
+    aliado= sim.getObjectHandle("aliado")
+    -- Intensidad percibida por el sensor (indices)
+    Lmin = 1 -- Si la resolucion del sensor es 1x1 pixel son lo mismo
+    Lmax = 6 
+    Lave = 11 -- Si la resolucion es NxN pixel Lave resume todo lo que ve 
+    -- Lectura de intensidad
+    i = 100
+    j = 100
+    ko= 100
+    --sensores de proximidad
+    sonar=sim.getObjectHandle("psensorf")
+    dist_max=0.9
+    dist_min=0.1
+    flag=0;
+end
+
+--Funcion sensor proximidad-----------------------------------------
+function getDist(sensor,dista_max)
+local detec, distancia
+detec, distancia=sim.readProximitySensor(sensor)
+if detec<0.1 then
+distancia=0
+end
+return distancia
+end
+-------------------------------------------------
+function sysCall_actuation()
+    -- put your actuation code here
+
+    
+    
+    if dist>0.2 then
+    if flag==0 then
+    v=Vmax
+    v2=Vmax
+    end
+    end
+    
+    if data2[2]>0.2 or data2[7]>0.2 or data2[12]>0.2 then
+    --detecta color rojo 0 ataca 1 no ataca
+        flag=0
+        else
+        flag=1
+    end
+    
+    if i < 0.5 then
+        v = -v_inicial
+        v2 =-v_inicial+1
+    end
+     
+    if j < 0.5 then
+        v = v_inicial
+        v2 =v_inicial+0.5
+    end
+    
+    print(data2)
+    sim.setJointTargetVelocity(M[L], v)
+    sim.setJointTargetVelocity(M[R], v2)
+    
+    
+    
+end
+
+function sysCall_sensing()
+    -- put your sensing code here
+    -- Lectura del sensor frontal
+    r, data = sim.readVisionSensor(sensor)
+    if r >= 0 then
+        i = data[Lave] -- Intensidad media
+    end
+    --lectura sensor atras
+    k, data = sim.readVisionSensor(sensorb)
+    if k >= 0 then
+        j = data[Lave] -- Intensidad media
+    end
+    
+     m, data2, color = sim.readVisionSensor(aliado)
+    if m >= 0 then
+        ko = data[Lave] -- Intensidad media
+    end
+    --conseguir la distancia
+     dist=getDist(sonar,dist_max)
+    
+end
+
+function sysCall_cleanup()
+    -- do some clean-up here
+end
+
+-- See the user manual or the available code snippets for additional callback functions and details
